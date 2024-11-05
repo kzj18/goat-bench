@@ -4,14 +4,13 @@ __pycache__/
 
 # environment
 variables.sh
-habitat-lab
 
 # development
 .idea
-.vscode
 
 # data
-data
+data/datasets
+data/goat-bench.zip
 
 # logs
 tb/

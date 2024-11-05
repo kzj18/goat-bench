@@ -1,0 +1,12 @@
+[submodule "dependencies/habitat-lab"]
+	path = dependencies/habitat-lab
+	url = git@github.com:facebookresearch/habitat-lab.git
+[submodule "dependencies/eai-vc"]
+	path = dependencies/eai-vc
+	url = git@github.com:facebookresearch/eai-vc.git
+[submodule "dependencies/habitat-sim"]
+	path = dependencies/habitat-sim
+	url = git@github.com:facebookresearch/habitat-sim.git
+[submodule "data/goat-assets"]
+	path = data/goat-assets
+	url = https://huggingface.co/datasets/axel81/goat-bench

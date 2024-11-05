@@ -1,6 +1,6 @@
 # GOAT-Bench: A Benchmark for Multi-Modal Lifelong Navigation
 
-Code for our paper [GOAT-Bench: A Benchmark for Multi-Modal Lifelong Navigation](as). 
+Code for our paper [GOAT-Bench: A Benchmark for Multi-Modal Lifelong Navigation](as).
 
 Mukul Khanna*, Ram Ramrakhya*, Gunjan Chhablani, Sriram Yenamandra, Theophile Gervet, Matthew Chang, Zsolt Kira, Devendra Singh Chaplot, Dhruv Batra, Roozbeh Mottaghi
 
@@ -15,41 +15,109 @@ Mukul Khanna*, Ram Ramrakhya*, Gunjan Chhablani, Sriram Yenamandra, Theophile Ge
   <p align="center">Sample episode from GOAT-Bench</p>  
 </p>
 
-
 GOAT-Bench is a benchmark for the Go to Any Thing (GOAT) task where an agent is spawned randomly in an unseen indoor environment and tasked with sequentially navigating to a variable number (in 5-10) of goal objects, described via the category name of the object (e.g. `couch`), a language description (e.g. `a black leather couch next to coffee table`), or an image of the object uniquely identifying the goal instance in the environment. We refer to finding each goal in a GOAT episode as a subtask. Each GOAT episode comprises 5 to 10 subtasks. We set up the GOAT task in an open-vocabulary setting; unlike many prior works, we are not restricted to navigating to a predetermined, closed set of object categories. The agent is expected to reach the goal object $g^k$ for the $k^{th}$ subtask as efficiently as possible within an allocated time budget. Once the agent completes the $k^{th}$ subtask by reaching the goal object or exhausts the allocated time budget, the agent receives next goal $g^{k+1}$ to navigate to. We use HelloRobot's Stretch robot embodiment for the GOAt agent. The agent has a height of 1.41m and base radius of 17cm. At each timestep, the agent has access to an 360 x 640 resolution RGB image $I_t$, depth image $D_t$, relative pose sensor with GPS+Compass information $P_t = (\delta x, \delta y, \delta z)$ from onboard sensors, as well as the current subtask goal $g^{k}_t$, $k$  $\forall$ $\{1, 2,...,5-10\}$. The agent's action space comprises move forward (by 0.25m), turn left and right (by 30º), look up and down (by 30º), and stop actions. A sub-task in a GOAT episode is deemed successful when the agent calls stop action within 1 meter euclidean distance from the current goal object instance – within a budget of 500 agent actions (per sub task).
-
 
 ## :hammer: Installation
 
-Create the conda environment and install all of the dependencies. Mamba is recommended for faster installation:
-```bash
-# Create conda environment. Mamba is recommended for faster installation.
-conda_env_name=goat
-mamba create -n $conda_env_name python=3.7 cmake=3.14.0 -y
-mamba install -n $conda_env_name \
-  habitat-sim=0.2.3 headless pytorch cudatoolkit=11.3 \
-  -c pytorch -c nvidia -c conda-forge -c aihabitat -y
+### Docker
 
-# Install this repo as a package
-mamba activate $conda_env_name
+#### CUDA-GL Docker
+
+```bash
+git clone https://gitlab.com/nvidia/container-images/cuda.git $HOME/Projects/cudagl
+cd $HOME/Projects/cudagl
+./build.sh -d --image-name nvidia/cudagl --cuda-version 11.3.0 --os ubuntu --os-version 20.04 --arch x86_64 --cudagl --push
+```
+
+#### Docker Usage
+
+##### Images
+
+```bash
+docker images
+```
+
+##### Containers
+
+```bash
+docker ps -a
+```
+
+#### Build Image
+
+```bash
+docker build -t goat_bench:latest .
+```
+
+#### Build Container from Image
+
+```bash
+docker rm Goat_Bench
+# Local Machine
+docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/Datasets:/home/kzj18/Datasets -v /lib/modules:/lib/modules -v /dev:/dev --network=host --privileged --ipc=host -itd --name Goat_Bench goat_bench:latest
+# Use proxy
+docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/Datasets:/home/kzj18/Datasets -v /lib/modules:/lib/modules -v /dev:/dev -e http_proxy=http://127.0.0.1:7890 -e https_proxy=http://127.0.0.1:7890 --network=host --privileged --ipc=host -itd --name Goat_Bench goat_bench:latest
+# Air Server
+docker run --net=host --gpus 'all,"capabilities=compute,utility,graphics"' -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=$XAUTH -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=all --runtime=nvidia -v $HOME/.Xauthority:/root/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v /DATA_EDS/yanzk:/home/kzj18/Datasets -v /dev/dri:/dev/dri --ipc=host -itd  -p 8022:22 -p 8023:5923 --name Goat_Bench goat_bench:latest
+```
+
+#### Attach Container
+
+```bash
+docker exec -it Goat_Bench /bin/bash
+```
+
+#### Commit Image
+
+```bash
+docker stop Goat_Bench && docker commit Goat_Bench goat_bench:latest && docker images -f "dangling=true" -q | xargs docker rmi
+```
+
+#### Save Image
+
+```bash
+mkdir -p $HOME/Projects/goat-bench/data
+docker save goat_bench:latest -o $HOME/Projects/goat-bench/data/Goat_Bench.tar
+```
+
+#### Load Image
+
+```bash
+docker load -i Goat_Bench.tar
+```
+
+### Conda
+
+Create the conda environment and install all of the dependencies. Mamba is recommended for faster installation:
+
+```bash
+mkdir -p ~/Projects
+git clone git@github.com:kzj18/goat-bench.git ~/Projects/goat-bench
+cd ~/Projects/goat-bench
+git submodule update --init --recursive --progress
+
+conda env create -f ~/Projects/goat-bench/environment.yml
+
+conda activate goat
+pip install -r ~/Projects/goat-bench/requirements.txt
+pip install salesforce-lavis
+
 pip install -e .
 
 # Install habitat-lab
-git clone --branch v0.2.3 git@github.com:facebookresearch/habitat-lab.git
-cd habitat-lab
-pip install -e habitat-lab
-pip install -e habitat-baselines
+cd ~/Projects/goat-bench/dependencies/habitat-lab && pip install -e habitat-lab && pip install -e habitat-baselines
+cd ~/Projects/goat-bench/dependencies/habitat-sim
+git submodule update --init --progress --recursive
+python setup.py install --with-cuda
 
-pip install -r requirements.txt
-pip install git+https://github.com/openai/CLIP.git
-pip install ftfy regex tqdm GPUtil trimesh seaborn timm scikit-learn einops transformers
+pip install git+ssh://git@github.com/openai/CLIP.git
 
-git clone  https://github.com/facebookresearch/eai-vc.git
-cd eai-vc
+cd ~/Projects/goat-bench/dependencies/eai-vc && pip install -e vc_models/
 
-pip install -e vc_models/
+gdown https://drive.google.com/uc?id=1N0UbpXK3v7oTphC4LoDqlNeMHbrwkbPe --output ~/Projects/goat-bench/data/goat-bench.zip
+unzip ~/Projects/goat-bench/data/goat-bench.zip -d ~/Projects/goat-bench
+cd ~/Projects/goat-bench/data/ && ln -s ../../../Datasets/hm3d_data/scene_datasets/ .
 ```
-
 
 ## :floppy_disk: Dataset
 
@@ -94,8 +162,7 @@ This command will download cached embeddings and model checkpoints for SenseAct-
 
 ## :bar_chart: Training
 
-
-### SenseAct-NN Monolithic Baseline
+### SenseAct-NN Monolithic Baseline Training
 
 Run the following command to train the monolithic GOAT policy that uses goal embeddings generated using CLIP text and image encoder:
 
@@ -115,7 +182,6 @@ To run distributed training on more than 1 GPU on a compute cluster managed usin
 ```bash
 sbatch scripts/train/2-goat-ver-monolithic.sh
 ```
-
 
 ## 🎯 Evaluation
 
@@ -150,7 +216,6 @@ To run evaluation on slurm as batch job use the following sbatch script:
 ```bash
 sbatch scripts/eval/2-goat-eval.sh
 ```
-
 
 ### SenseAct-NN Skill-Chain Baseline
 
@@ -187,7 +252,7 @@ python -um goat_bench.run \
 
 If you use this code or benchmark in your research, please consider citing:
 
-```
+```latex
 @inproceedings{khanna2024goatbench,
       title={GOAT-Bench: A Benchmark for Multi-Modal Lifelong Navigation}, 
       author={Mukul Khanna* and Ram Ramrakhya* and Gunjan Chhablani and Sriram Yenamandra and Theophile Gervet and Matthew Chang and Zsolt Kira and Devendra Singh Chaplot and Dhruv Batra and Roozbeh Mottaghi},
