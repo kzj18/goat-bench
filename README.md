@@ -54,9 +54,9 @@ docker build -t goat_bench:latest .
 ```bash
 docker rm Goat_Bench
 # Local Machine
-docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/Datasets:/home/kzj18/Datasets -v /lib/modules:/lib/modules -v /dev:/dev --network=host --privileged --ipc=host -itd --name Goat_Bench goat_bench:latest
+docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/Datasets:/home/kzj18/Datasets -v /media/$USER:/media/kzj18 -v /lib/modules:/lib/modules -v /dev:/dev --network=host --privileged --ipc=host -itd --name Goat_Bench goat_bench:latest
 # Use proxy
-docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/Datasets:/home/kzj18/Datasets -v /lib/modules:/lib/modules -v /dev:/dev -e http_proxy=http://127.0.0.1:7890 -e https_proxy=http://127.0.0.1:7890 --network=host --privileged --ipc=host -itd --name Goat_Bench goat_bench:latest
+docker run --gpus all -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME/Datasets:/home/kzj18/Datasets -v /media/$USER:/media/kzj18 -v /lib/modules:/lib/modules -v /dev:/dev -e http_proxy=http://127.0.0.1:7890 -e https_proxy=http://127.0.0.1:7890 --network=host --privileged --ipc=host -itd --name Goat_Bench goat_bench:latest
 # Air Server
 docker run --net=host --gpus 'all,"capabilities=compute,utility,graphics"' -e DISPLAY=$DISPLAY -e QT_X11_NO_MITSHM=1 -e XAUTHORITY=$XAUTH -e NVIDIA_VISIBLE_DEVICES=all -e NVIDIA_DRIVER_CAPABILITIES=all --runtime=nvidia -v $HOME/.Xauthority:/root/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v /DATA_EDS/yanzk:/home/kzj18/Datasets -v /dev/dri:/dev/dri --ipc=host -itd  -p 8022:22 -p 8023:5923 --name Goat_Bench goat_bench:latest
 ```
