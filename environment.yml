@@ -1,11 +1,11 @@
-name: Py37_goat
+name: Py38_goat
 channels:
   - defaults
   - pytorch
   - nvidia
   - conda-forge
 dependencies:
-  - python=3.7
+  - python=3.8
   - cmake=3.14.0
   - pytorch
   - cudatoolkit=11.3

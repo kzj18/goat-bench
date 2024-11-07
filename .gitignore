@@ -10,6 +10,7 @@ variables.sh
 
 # data
 data/datasets
+data/goat-assets
 data/goat-bench.zip
 
 # logs

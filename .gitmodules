@@ -7,6 +7,3 @@
 [submodule "dependencies/habitat-sim"]
 	path = dependencies/habitat-sim
 	url = git@github.com:facebookresearch/habitat-sim.git
-[submodule "data/goat-assets"]
-	path = data/goat-assets
-	url = https://huggingface.co/datasets/axel81/goat-bench

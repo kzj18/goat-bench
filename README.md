@@ -96,11 +96,10 @@ git clone git@github.com:kzj18/goat-bench.git ~/Projects/goat-bench
 cd ~/Projects/goat-bench
 git submodule update --init --recursive --progress
 
-conda env create -f ~/Projects/goat-bench/environment.yml
+conda env create -v -f ~/Projects/goat-bench/environment.yml
 
 conda activate goat
 pip install -r ~/Projects/goat-bench/requirements.txt
-pip install salesforce-lavis
 
 pip install -e .
 
@@ -155,6 +154,8 @@ The code requires the datasets in `data` folder in the following format:
 In order to increase training throughput we leverage frozen pretrained visual and text encoder (ex: CLIP) for encoding goals. As the goal encoders are not being finetuned during training we cache the embeddings for all object categories, language instructions and image goals on disk. You can download these embeddings from the following [huggingface repo 🤗](https://huggingface.co/datasets/axel81/goat-bench) using following command:
 
 ```bash
+sudo apt install git-lfs -y
+git lfs install
 git clone https://huggingface.co/datasets/axel81/goat-bench data/goat-assets/
 ```
 
