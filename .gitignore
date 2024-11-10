@@ -12,6 +12,7 @@ variables.sh
 data/datasets
 data/goat-assets
 data/goat-bench.zip
+data/new_checkpoints
 
 # logs
 tb/

@@ -2,13 +2,21 @@
 
 import argparse
 import glob
+import time
 import os
+WORKSPACE = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 import os.path as osp
+import shutil
 
 import torch
 from habitat import get_config
 from habitat.config import read_write
-from habitat.config.default_structured_configs import register_hydra_plugin
+from habitat.config.default_structured_configs import (
+    register_hydra_plugin,
+    CollisionsMeasurementConfig,
+    FogOfWarConfig,
+    TopDownMapMeasurementConfig,
+)
 from habitat_baselines.run import execute_exp
 from omegaconf import OmegaConf  # keep this import for print debugging
 
@@ -96,10 +104,40 @@ def main():
 
     with read_write(config):
         edit_config(config, args)
+        config.habitat.task.measurements.update(
+            {
+                "top_down_map": TopDownMapMeasurementConfig(
+                    map_padding=3,
+                    map_resolution=1024,
+                    draw_source=True,
+                    draw_border=True,
+                    draw_view_points=False,
+                    draw_goal_positions=False,
+                    draw_goal_aabbs=False,
+                    draw_shortest_path=False,
+                    fog_of_war=FogOfWarConfig(
+                        draw=True,
+                        visibility_dist=5.0,
+                        fov=90,
+                    ),
+                ),
+                "collisions": CollisionsMeasurementConfig(),
+            }
+        )
 
+    new_checkpoints_dir = os.path.join(WORKSPACE, 'data', 'new_checkpoints')
+    os.makedirs(new_checkpoints_dir, exist_ok=True)
+    new_checkpoint_path = os.path.join(new_checkpoints_dir, f'.habitat-resume-state{args.run_type}.pth')
+    if os.path.exists(new_checkpoint_path):
+        shutil.move(
+            new_checkpoint_path,
+            os.path.join(new_checkpoints_dir, time.strftime("%Y%m%d-%H%M%S") + os.path.basename(new_checkpoint_path)))
     # print(OmegaConf.to_yaml(config))
     execute_exp(config, args.run_type)
-
+    if os.path.exists(new_checkpoint_path):
+        shutil.move(
+            new_checkpoint_path,
+            os.path.join(new_checkpoints_dir, time.strftime("%Y%m%d-%H%M%S") + os.path.basename(new_checkpoint_path)))
 
 def merge_config(config, opts):
     """There might be a better way to do this with Hydra... do I know it? No.

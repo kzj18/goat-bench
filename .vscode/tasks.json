@@ -1,0 +1,55 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "batch 2-goat-eval val_seen",
+			"command": [
+                "${workspaceFolder}/scripts/eval/3-batch-goat-eval.sh"
+			],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"options": {
+				"shell": {
+					"executable": "/bin/bash",
+					"args": ["-ic"]
+				}
+			}
+		},
+		{
+			"type": "shell",
+			"label": "test 2-goat-eval val_seen",
+			"command": [
+                "${workspaceFolder}/scripts/eval/3-goat-eval.sh"
+			],
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"options": {
+				"shell": {
+					"executable": "/bin/bash",
+					"args": ["-ic"]
+				}
+			}
+		}
+	]
+}

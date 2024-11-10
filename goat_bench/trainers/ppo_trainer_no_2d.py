@@ -296,33 +296,45 @@ class GoatPPOTrainer(PPOTrainer):
 
                 if len(self.config.habitat_baselines.eval.video_option) > 0:
                     # TODO move normalization / channel changing out of the policy and undo it here
-                    frame = observations_to_image(
-                        {k: v[i] for k, v in vis_batch.items() if "rgb" in k},
-                        {
+                    frame_top_down_map = {
                             "top_down_map": {
                                 k.split(".")[-1]: v
                                 for k, v in infos[i].items()
                                 if "top_down_map" in k
+                            },
+                            "collisions": {
+                                k.split(".")[-1]: v
+                                for k, v in infos[i].items()
+                                if "collisions" in k
                             }
-                        },
+                        }
+                    frame = observations_to_image(
+                        {k: v[i] for k, v in vis_batch.items() if "rgb" in k},
+                        frame_top_down_map if len(frame_top_down_map["top_down_map"]) > 0 else {},
                     )
                     print("Info: {}".format(infos[i].keys()))
                     if not not_done_masks[i].item():
                         # The last frame corresponds to the first frame of the next episode
                         # but the info is correct. So we use a black frame
+                        frame_top_down_map = {
+                            "top_down_map": {
+                                k.split(".")[-1]: v
+                                for k, v in infos[i].items()
+                                if "top_down_map" in k
+                            },
+                            "collisions": {
+                                k.split(".")[-1]: v
+                                for k, v in infos[i].items()
+                                if "collisions" in k
+                            }
+                        }
                         frame = observations_to_image(
                             {
                                 k: v[i] * 0.0
                                 for k, v in vis_batch.items()
                                 if "rgb" in k
                             },
-                            {
-                                "top_down_map": {
-                                    k.split(".")[-1]: v
-                                    for k, v in infos[i].items()
-                                    if "top_down_map" in k
-                                }
-                            },
+                            frame_top_down_map if len(frame_top_down_map["top_down_map"]) > 0 else {},
                         )
                     # frame = overlay_frame(frame, infos[i])
                     rgb_frames[i].append(frame)
