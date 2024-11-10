@@ -312,7 +312,7 @@ class GoatPPOTrainer(PPOTrainer):
                         {k: v[i] for k, v in vis_batch.items() if "rgb" in k},
                         frame_top_down_map if len(frame_top_down_map["top_down_map"]) > 0 else {},
                     )
-                    print("Info: {}".format(infos[i].keys()))
+                    # print("Info: {}".format(infos[i].keys()))
                     if not not_done_masks[i].item():
                         # The last frame corresponds to the first frame of the next episode
                         # but the info is correct. So we use a black frame
@@ -376,9 +376,15 @@ class GoatPPOTrainer(PPOTrainer):
                     episode_metrics.append(episode_state_copy)
 
                     if len(self.config.habitat_baselines.eval.video_option) > 0:
+                        video_dir = os.path.join(self.config.habitat_baselines.video_dir, str(len(episode_metrics)))
+                        os.makedirs(video_dir, exist_ok=True)
+                        write_json(
+                            episode_state_copy,
+                            os.path.join(video_dir, "episode_metrics.json"),
+                        )
                         generate_video(
                             video_option=self.config.habitat_baselines.eval.video_option,
-                            video_dir=self.config.habitat_baselines.video_dir,
+                            video_dir=video_dir,
                             images=rgb_frames[i],
                             episode_id=current_episodes_info[i].episode_id,
                             checkpoint_idx=checkpoint_index,
